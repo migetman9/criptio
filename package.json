@@ -1,13 +1,13 @@
 {
-  "name": "cryptor",
+  "name": "criptio",
   "version": "1.0.0",
-  "description": "A CLI for encrypt and decrypt files",
+  "description": "Criptio is a nodejs command line for encrypt and decrypt files",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "cryptor": "./index.js"
+    "criptio": "./index.js"
   },
   "author": "Pachito Marco Calabrese <pm.calabrese@gmail.com>",
   "license": "ISC",

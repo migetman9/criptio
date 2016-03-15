@@ -4,16 +4,10 @@ const yargs = require('yargs')
 const ProgressBar = require('progress');
 const inquirer = require("inquirer");
 const crypto = require('crypto');
+const fs = require('fs');
     
-var DEFAULT_ALGORITHM = 'aes-256-ctr';
-var EPILOGUE_TEXT = "Developed by Pachito Marco Calabrese"
-
-var fs = require('fs');
-var zlib = require('zlib');
-
-// start pipe
-//r.pipe(zip).pipe(encrypt).pipe(decrypt).pipe(unzip).pipe(w);
-//r.pipe(encrypt).pipe(w);
+const DEFAULT_ALGORITHM = 'aes-256-ctr';
+const EPILOGUE_TEXT = "Developed by Pachito Marco Calabrese"
 
 function bar(stream,file,encrypt) {
     var fileSize = fs.statSync(file).size;
@@ -42,7 +36,6 @@ var questions = [{
 
 /* commands */
 yargs
-.usage('Usage: $0 <command> [options]')
 .command('encrypt','Encrypt file', function(yargs) {
     return yargs
     .demand(2)
@@ -56,7 +49,9 @@ yargs
         default: DEFAULT_ALGORITHM,
         demand: false
     })
-    .usage("$0 encrypt <INPUT_FILE> [<OUTPUT_FILE>]")
+    .usage("$0 encrypt [--password] [--algorithm] <INPUT_FILE> [<OUTPUT_FILE>]")
+    .example("$0 encrypt --algorithm=aes256 myfile.txt")
+    .example("$0 encrypt myfile.txt.encrypted")
     .help()
 },function (argv) {
     inquirer.prompt(questions, function( answers ) {
@@ -82,7 +77,9 @@ yargs
         default: DEFAULT_ALGORITHM,
         demand: false
     })
-    .usage("decrypt <INPUT_FILE> [<OUTPUT_FILE>]")
+    .usage("$0 decrypt [--password] [--algorithm] <INPUT_FILE> [<OUTPUT_FILE>]")
+    .example("$0 decrypt --algorithm=aes256 myfile.txt.encrypted")
+    .example("$0 decrypt myfile.txt.encrypted")
     .help()
 },function (argv) {
     inquirer.prompt(questions, function( answers ) {
@@ -95,7 +92,8 @@ yargs
     });
 })
 .demand(2)
-.example("$0 <COMMAND> [--password] [--algorithm] <INPUT_FILE> <OUTPUT_FILE>")
+.usage("$0 <COMMAND> [--password] [--algorithm] <INPUT_FILE> <OUTPUT_FILE>")
+.example("$0 encrypt myfile.txt")
 .demand('password')
 .alias('password', 'p')
 .nargs('password', 1)
@@ -103,6 +101,6 @@ yargs
 .alias('algorithm', 'a')
 .nargs('algorithm', 1)
 .describe('algorithm', 'Encryption/Decryption Algorithm')
-.choices('algorithm', [DEFAULT_ALGORITHM,])
+.choices('algorithm', crypto.getCiphers())
 .epilogue(EPILOGUE_TEXT)
 .argv;
