@@ -1,15 +1,13 @@
 #!/usr/bin/env node
-// Nodejs encryption of buffers
+
 const yargs = require('yargs')
 const ProgressBar = require('progress');
 const inquirer = require("inquirer");
 const crypto = require('crypto');
 const fs = require('fs');
-    
-const DEFAULT_ALGORITHM = 'aes-256-ctr';
-const EPILOGUE_TEXT = "Developed by Pachito Marco Calabrese"
+const CONSTANTS = require('./constants.js')
 
-function bar(stream,file,encrypt) {
+function bar(stream, file, encrypt) {
     var fileSize = fs.statSync(file).size;
     var barOpts = {
         width: 20,
@@ -22,85 +20,62 @@ function bar(stream,file,encrypt) {
     });
 }
 
-var questions = [{
-    type: 'password',
-    name: 'password',
-    message: 'Type your encrypt/decrypt password'
-},{
-    type: 'list',
-    name: 'algorithm',
-    message: 'Choose an encrypt/decrypt algorithm',
-    default: DEFAULT_ALGORITHM,
-    choices: crypto.getCiphers()
-}]
+function encrypt(argv) {
+    inquirer.prompt(questions, function( answers ) {
+        const cipher = crypto.createCipher(answers.algorithm, answers.password);
+        const r = fs.createReadStream(argv._[1]);
+        const w = fs.createWriteStream(argv._[2] || argv._[1]+'.encrypted');
+        bar(r,argv._[1], true)
+        r.pipe(cipher).pipe(w);
+        console.log(argv._[1]+" encrypted, "+(argv._[2] || argv._[1]+'.encrypted'));
+    });
+}
+
+function decrypt(argv) {
+    inquirer.prompt(questions, function( answers ) {
+        const decipher = crypto.createDecipher(answers.algorithm, answers.password);
+        const r = fs.createReadStream(argv._[1]);
+        const w = fs.createWriteStream(argv._[2] || argv._[1]+'.decrypted');
+        bar(r,argv._[1], false)
+        r.pipe(decipher).pipe(w);
+        console.log(argv._[1]+" decrypted, "+(argv._[2] || argv._[1]+'.decrypted'));
+    });
+}
+
+var questions = [CONSTANTS.QUESTION_PASSWORD,CONSTANTS.QUESTION_ALGORITHM]
 
 /* commands */
 yargs
 .command('encrypt','Encrypt file', function(yargs) {
     return yargs
     .demand(2)
-    .option('password', {
-        alias: 'p',
-        describe: 'Encrypt Password'
-    })
-    .option('algorithm', {
-        alias: 'a',
-        describe: 'Encrypt algorithm',
-        default: DEFAULT_ALGORITHM,
-        demand: false
-    })
-    .usage("$0 encrypt [--password] [--algorithm] <INPUT_FILE> [<OUTPUT_FILE>]")
-    .example("$0 encrypt --algorithm=aes256 myfile.txt")
-    .example("$0 encrypt myfile.txt.encrypted")
+    .option('password', CONSTANTS.YARGS_OPTIONS_ENCRYPT_PASSWORD)
+    .option('algorithm', CONSTANTS.YARGS_OPTIONS_ENCRYPT_ALOGORITHM)
+    .usage(CONSTANTS.YARGS_OPTIONS_ENCRYPT_USAGE)
+    .example(CONSTANTS.YARGS_OPTIONS_ENCRYPT_EXAMPLE_1)
+    .example(CONSTANTS.YARGS_OPTIONS_ENCRYPT_EXAMPLE_2)
     .help()
-},function (argv) {
-    inquirer.prompt(questions, function( answers ) {
-        // Use user feedback for... whatever!! 
-        const cipher = crypto.createCipher(answers.algorithm, answers.password);
-        var r = fs.createReadStream(argv._[1] || 'file.txt');
-        var w = fs.createWriteStream(argv._[2] || argv._[1]+'.encrypted');
-        bar(r,argv._[1] || 'file.txt', true)
-        r.pipe(cipher).pipe(w);
-        console.log(argv._[1]+" encrypted, "+(argv._[2] || argv._[1]+'.encrypted'));
-    });
-})
-.command('decrypt','Descrypt file', function(yargs) {
+},encrypt)
+.command('decrypt','Decrypt file', function(yargs) {
     return yargs
     .demand(2)
-    .option('password', {
-        alias: 'p',
-        describe: 'Encrypt Password'
-    })
-    .option('algorithm', {
-        alias: 'a',
-        describe: 'Encrypt algorithm',
-        default: DEFAULT_ALGORITHM,
-        demand: false
-    })
-    .usage("$0 decrypt [--password] [--algorithm] <INPUT_FILE> [<OUTPUT_FILE>]")
-    .example("$0 decrypt --algorithm=aes256 myfile.txt.encrypted")
-    .example("$0 decrypt myfile.txt.encrypted")
+    .option('password', CONSTANTS.YARGS_OPTIONS_DECRYPT_PASSWORD)
+    .option('algorithm', CONSTANTS.YARGS_OPTIONS_DECRYPT_ALOGORITHM)
+    .usage(CONSTANTS.YARGS_OPTIONS_DECRYPT_USAGE)
+    .example(CONSTANTS.YARGS_OPTIONS_DECRYPT_EXAMPLE_1)
+    .example(CONSTANTS.YARGS_OPTIONS_DECRYPT_EXAMPLE_2)
     .help()
-},function (argv) {
-    inquirer.prompt(questions, function( answers ) {
-        const decipher = crypto.createDecipher(answers.algorithm, answers.password);
-        var r = fs.createReadStream(argv._[1] || 'file.txt');
-        var w = fs.createWriteStream(argv._[2] || argv._[1]+'.decrypted');
-        bar(r,argv._[1] || 'file.txt', false)
-        r.pipe(decipher).pipe(w);
-        console.log(argv._[1]+" decrypted, "+(argv._[2] || argv._[1]+'.decrypted'));
-    });
-})
+},decrypt)
 .demand(2)
-.usage("$0 <COMMAND> [--password] [--algorithm] <INPUT_FILE> <OUTPUT_FILE>")
-.example("$0 encrypt myfile.txt")
+.usage(CONSTANTS.YARGS_USAGE)
+.example(CONSTANTS.YARGS_EXAMPLE)
 .demand('password')
 .alias('password', 'p')
 .nargs('password', 1)
-.describe('password', 'Encrypt/Decrypt Password')
+.describe('password', CONSTANTS.YARGS_OPTIONS_PASSWORD)
 .alias('algorithm', 'a')
 .nargs('algorithm', 1)
-.describe('algorithm', 'Encryption/Decryption Algorithm')
-.choices('algorithm', crypto.getCiphers())
-.epilogue(EPILOGUE_TEXT)
+.describe('algorithm', CONSTANTS.YARGS_OPTIONS_ALGORITHM)
+.choices('algorithm', CONSTANTS.QUESTION_ALGORITHM.choices)
+.epilogue(CONSTANTS.EPILOGUE_TEXT)
 .argv;
