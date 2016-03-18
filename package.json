@@ -1,6 +1,6 @@
 {
   "name": "criptio",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A nodejs command line for encrypt and decrypt files",
   "main": "index.js",
   "scripts": {
