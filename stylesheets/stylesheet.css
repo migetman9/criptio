@@ -421,5 +421,11 @@ Small Device Styles
     max-width: 480px;
     font-size: 11px;
   }
+  
+  q {
+    font-style: italic;
+    padding: 23px;
+    color: #666;
+  }
 
 }
