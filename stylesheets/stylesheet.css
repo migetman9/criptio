@@ -125,6 +125,12 @@ footer a {
   text-decoration: underline;
 }
 
+q {
+  font-style: italic;
+  padding: 13px;
+  color: #666;
+}
+
 em {
   font-style: italic;
 }
@@ -424,7 +430,7 @@ Small Device Styles
   
   q {
     font-style: italic;
-    padding: 23px;
+    padding: 13px;
     color: #666;
   }
 
