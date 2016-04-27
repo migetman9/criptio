@@ -1,0 +1,12 @@
+body {
+    font-size: 15px;
+    overflow-y: auto!important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.osx-font {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}

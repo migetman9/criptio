@@ -15,5 +15,8 @@
     "inquirer": "^0.12.0",
     "progress": "^1.1.8",
     "yargs": "^4.3.1"
+  },
+  "devDependencies": {
+    "bulma": "0.0.24"
   }
 }
